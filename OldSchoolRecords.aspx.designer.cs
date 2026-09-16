@@ -1,0 +1,10 @@
+namespace DigitalSchoolManager
+{
+    public partial class OldSchoolRecords
+    {
+        protected global::System.Web.UI.WebControls.Panel pnlMessage; protected global::System.Web.UI.WebControls.Label lblMessage; protected global::System.Web.UI.WebControls.Label lblEditorTitle; protected global::System.Web.UI.WebControls.Button btnNew; protected global::System.Web.UI.WebControls.HiddenField hidRecordID;
+        protected global::System.Web.UI.WebControls.DropDownList ddlCategory; protected global::System.Web.UI.WebControls.TextBox txtTitle; protected global::System.Web.UI.WebControls.TextBox txtReference; protected global::System.Web.UI.WebControls.TextBox txtYear; protected global::System.Web.UI.WebControls.TextBox txtStartDate; protected global::System.Web.UI.WebControls.TextBox txtEndDate; protected global::System.Web.UI.WebControls.TextBox txtLocation; protected global::System.Web.UI.WebControls.DropDownList ddlConfidentiality; protected global::System.Web.UI.WebControls.TextBox txtDescription; protected global::System.Web.UI.WebControls.TextBox txtKeywords; protected global::System.Web.UI.WebControls.FileUpload fuDocuments; protected global::System.Web.UI.WebControls.Button btnSave;
+        protected global::System.Web.UI.WebControls.TextBox txtSearch; protected global::System.Web.UI.WebControls.DropDownList ddlFilterCategory; protected global::System.Web.UI.WebControls.Button btnSearch; protected global::System.Web.UI.WebControls.GridView gvRecords;
+        protected global::System.Web.UI.WebControls.Panel pnlDocuments; protected global::System.Web.UI.WebControls.Label lblSelectedArchive; protected global::System.Web.UI.WebControls.Label lblSelectedTitle; protected global::System.Web.UI.WebControls.Button btnCloseDocuments; protected global::System.Web.UI.WebControls.HiddenField hidDocumentRecordID; protected global::System.Web.UI.WebControls.GridView gvDocuments; protected global::System.Web.UI.WebControls.FileUpload fuMoreDocuments; protected global::System.Web.UI.WebControls.Button btnAddDocuments;
+    }
+}
