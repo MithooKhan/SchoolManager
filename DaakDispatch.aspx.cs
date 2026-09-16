@@ -1,0 +1,42 @@
+using System;
+using System.Data;
+using System.Globalization;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+namespace DigitalSchoolManager
+{
+    public partial class DaakDispatch : Page
+    {
+        protected void Page_Load(object sender, EventArgs e) { if (IsPostBack) return; ClearEntryForm(); try { OfficeDaakService.EnsureSchema(); OfficeDaakAttachmentService.EnsureSchema(); BindSummary(); BindDispatchRegister(); } catch (Exception ex) { ShowMessage("The outgoing Daak register could not be prepared. Run OfficeDaak_Database_Update.sql if the database user cannot create tables. Details: " + ex.Message, "error"); } }
+        protected void btnSaveDispatch_Click(object sender, EventArgs e)
+        {
+            Page.Validate("DispatchEntry"); if (!Page.IsValid) { ShowMessage("Complete the required dispatch details before saving.", "error"); return; }
+            DateTime date; if (!TryParseRequiredDate(txtDispatchDate.Text, out date)) { ShowMessage("Enter a valid dispatch date.", "error"); return; } DateTime? letterDate = ParseOptionalDate(txtLetterDate.Text); if (!string.IsNullOrWhiteSpace(txtLetterDate.Text) && !letterDate.HasValue) { ShowMessage("Enter a valid letter date.", "error"); return; }
+            try
+            {
+                OfficeDaakService.EnsureSchema(); OfficeDaakAttachmentService.EnsureSchema(); var files = OfficeDaakAttachmentService.ReadUploads(fuDispatchDocument);
+                DaakDispatchRecord record = new DaakDispatchRecord { DispatchDate = date, LetterDate = letterDate, RecipientOffice = txtRecipientOffice.Text, RecipientAddress = txtRecipientAddress.Text, RecipientContact = txtRecipientContact.Text, Subject = txtSubject.Text, ReferenceNo = txtReferenceNo.Text, Description = txtDescription.Text, Category = ddlCategory.SelectedValue, Priority = ddlPriority.SelectedValue, DispatchMode = ddlDispatchMode.SelectedValue, TrackingNo = txtTrackingNo.Text, SignedBy = txtSignedBy.Text, PreparedBy = txtPreparedBy.Text, Status = ddlStatus.SelectedValue, Remarks = txtRemarks.Text, Document = null, CreatedByUserID = GetCurrentUserId() };
+                int id; int.TryParse(hfDispatchID.Value, out id); bool updated = id > 0; string number; if (updated) number = OfficeDaakAttachmentService.UpdateDispatch(id, record); else { number = OfficeDaakService.CreateDispatch(record); id = OfficeDaakAttachmentService.GetRecordId("Outgoing", number); } OfficeDaakAttachmentService.AddDocuments("Outgoing", id, files, GetCurrentUserId()); ClearEntryForm(); lblSavedDispatchNo.Text = number; lblSavedDispatchDate.Text = date.ToString("dd MMMM yyyy", CultureInfo.InvariantCulture); pnlSavedReceipt.Visible = true; BindSummary(); gvDispatch.PageIndex = 0; BindDispatchRegister(); ShowMessage((updated ? "Outgoing Daak updated: " : "Outgoing Daak saved: ") + number + ". " + files.Count.ToString(CultureInfo.InvariantCulture) + " new page(s) archived.", "success");
+            }
+            catch (Exception ex) { ShowMessage("The outgoing Daak could not be saved. " + ex.Message, "error"); }
+        }
+        protected void btnClearDispatch_Click(object sender, EventArgs e) { ClearEntryForm(); pnlSavedReceipt.Visible = false; HideMessage(); }
+        protected void btnSearch_Click(object sender, EventArgs e) { gvDispatch.PageIndex = 0; BindDispatchRegister(); }
+        protected void btnResetSearch_Click(object sender, EventArgs e) { txtSearch.Text = txtFromDate.Text = txtToDate.Text = string.Empty; ddlFilterStatus.SelectedIndex = 0; gvDispatch.PageIndex = 0; BindDispatchRegister(); HideMessage(); }
+        protected void gvDispatch_PageIndexChanging(object sender, GridViewPageEventArgs e) { gvDispatch.PageIndex = e.NewPageIndex; BindDispatchRegister(); }
+        protected void gvDispatch_RowCommand(object sender, GridViewCommandEventArgs e) { if (e.CommandName != "EditRecord") return; int id; if (!int.TryParse(Convert.ToString(e.CommandArgument, CultureInfo.InvariantCulture), out id)) { ShowMessage("The selected dispatch record is invalid.", "error"); return; } try { LoadRecord(id); ShowMessage("The dispatch entry is ready to edit. Existing pages remain stored; selected files will be added.", "success"); } catch (Exception ex) { ShowMessage(ex.Message, "error"); } }
+        private void LoadRecord(int id) { DataRow r = OfficeDaakAttachmentService.GetRecord("Outgoing", id); hfDispatchID.Value = id.ToString(CultureInfo.InvariantCulture); txtDispatchDate.Text = InputDate(r["DispatchDate"]); txtLetterDate.Text = InputDate(r["LetterDate"]); txtRecipientOffice.Text = S(r, "RecipientOffice"); txtRecipientAddress.Text = S(r, "RecipientAddress"); txtRecipientContact.Text = S(r, "RecipientContact"); txtSubject.Text = S(r, "Subject"); txtReferenceNo.Text = S(r, "ReferenceNo"); txtDescription.Text = S(r, "Description"); Set(ddlCategory, S(r, "Category")); Set(ddlPriority, S(r, "Priority")); Set(ddlDispatchMode, S(r, "DispatchMode")); txtTrackingNo.Text = S(r, "TrackingNo"); txtSignedBy.Text = S(r, "SignedBy"); txtPreparedBy.Text = S(r, "PreparedBy"); Set(ddlStatus, S(r, "Status")); txtRemarks.Text = S(r, "Remarks"); btnSaveDispatch.Text = "Update Dispatch Entry and Add Pages"; pnlSavedReceipt.Visible = false; }
+        private void BindDispatchRegister() { try { DateTime? from = ParseOptionalDate(txtFromDate.Text), to = ParseOptionalDate(txtToDate.Text); if ((!string.IsNullOrWhiteSpace(txtFromDate.Text) && !from.HasValue) || (!string.IsNullOrWhiteSpace(txtToDate.Text) && !to.HasValue)) throw new InvalidOperationException("Enter valid register dates."); if (from.HasValue && to.HasValue && from.Value > to.Value) throw new InvalidOperationException("The from date cannot be later than the to date."); gvDispatch.DataSource = OfficeDaakService.GetDispatchRecords(txtSearch.Text, ddlFilterStatus.SelectedValue, from, to); gvDispatch.DataBind(); } catch (Exception ex) { ShowMessage("Outgoing Daak records could not be loaded. " + ex.Message, "error"); } }
+        private void BindSummary() { DaakRegisterStats s = OfficeDaakService.GetDispatchStats(); lblTotalRecords.Text = s.TotalRecords.ToString("N0", CultureInfo.InvariantCulture); lblTodayRecords.Text = s.TodayRecords.ToString("N0", CultureInfo.InvariantCulture); lblActiveRecords.Text = s.ActiveRecords.ToString("N0", CultureInfo.InvariantCulture); lblFiledCopies.Text = s.FiledCopies.ToString("N0", CultureInfo.InvariantCulture); }
+        private void ClearEntryForm() { hfDispatchID.Value = "0"; txtDispatchDate.Text = txtLetterDate.Text = DateTime.Today.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture); txtRecipientOffice.Text = txtRecipientAddress.Text = txtRecipientContact.Text = txtReferenceNo.Text = txtSubject.Text = txtDescription.Text = txtTrackingNo.Text = txtPreparedBy.Text = txtSignedBy.Text = txtRemarks.Text = string.Empty; Set(ddlCategory, "General"); Set(ddlPriority, "Normal"); Set(ddlDispatchMode, "By Hand"); Set(ddlStatus, "Dispatched"); btnSaveDispatch.Text = "Save and Assign Dispatch Number"; }
+        private int? GetCurrentUserId() { int id; return Session != null && int.TryParse(Convert.ToString(Session["SystemUserID"], CultureInfo.InvariantCulture), out id) ? (int?)id : null; }
+        private static bool TryParseRequiredDate(string value, out DateTime date) { return DateTime.TryParseExact(value, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out date); }
+        private static DateTime? ParseOptionalDate(string value) { if (string.IsNullOrWhiteSpace(value)) return null; DateTime date; return TryParseRequiredDate(value, out date) ? (DateTime?)date.Date : null; }
+        private static string InputDate(object value) { return value == null || value == DBNull.Value ? string.Empty : Convert.ToDateTime(value, CultureInfo.InvariantCulture).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture); }
+        private static string S(DataRow r, string c) { return r[c] == DBNull.Value ? string.Empty : Convert.ToString(r[c], CultureInfo.InvariantCulture); }
+        private static void Set(ListControl list, string value) { ListItem item = list.Items.FindByValue(value); if (item != null) list.SelectedValue = value; }
+        private void ShowMessage(string message, string type) { pnlMessage.Visible = true; pnlMessage.CssClass = "office-daak-message office-daak-message-" + type; lblMessage.Text = Server.HtmlEncode(message); }
+        private void HideMessage() { pnlMessage.Visible = false; lblMessage.Text = string.Empty; }
+    }
+}

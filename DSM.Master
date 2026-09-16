@@ -1,0 +1,182 @@
+<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="DSM.Master.cs" Inherits="DigitalSchoolManager.DSM" %>
+
+<!DOCTYPE html>
+<html lang="en">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0f5132" />
+    <title><%: GetPageTitle() %></title>
+    <link href="<%= ResolveUrl("~/SchoolTheme.css") %>?v=16r7-4-8-board-results" rel="stylesheet" />
+    <asp:ContentPlaceHolder ID="head" runat="server" />
+</head>
+<body class="<%= GetBodyCssClass() %>">
+    <form id="form1" runat="server">
+        <a class="skip-link" href="#main-content">Skip to main content</a>
+
+        <header class="site-header">
+            <div class="school-brand-bar">
+                <a class="school-brand" href="<%= ResolveUrl(GetHomeUrl()) %>" aria-label="Open dashboard">
+                    <span class="school-brand-mark">
+                        <img src="<%= ResolveUrl("~/images/SchoolLogo.png") %>"
+                            alt="Government Higher Secondary School Maankot logo" />
+                    </span>
+                    <span class="school-brand-copy">
+                        <strong>Government Higher Secondary School Maankot</strong>
+                        <small>Digital School Manager</small>
+                    </span>
+                </a>
+                <asp:Panel ID="pnlGuestSession" runat="server" CssClass="school-session-panel school-session-guest">
+                    <span class="session-status-dot" aria-hidden="true"></span>
+                    <span class="school-session-copy"><small>Guest access</small><strong>Dashboard only</strong></span>
+                    <asp:HyperLink ID="lnkLogin" runat="server" NavigateUrl="~/PortalLogin.aspx"
+                        Text="Portal Login" CssClass="master-login-button" />
+                </asp:Panel>
+
+                <asp:Panel ID="pnlUserSession" runat="server" Visible="false" CssClass="school-session-panel school-session-user">
+                    <span class="session-status-dot" aria-hidden="true"></span>
+                    <span class="school-session-copy">
+                        <small>Signed in as <asp:Label ID="lblSignedInRole" runat="server" /></small>
+                        <strong><asp:Label ID="lblSignedInUser" runat="server" /></strong>
+                    </span>
+                    <asp:LinkButton ID="btnLogout" runat="server" Text="Logout"
+                        CssClass="master-logout-button" CausesValidation="false" OnClick="btnLogout_Click" />
+                </asp:Panel>
+            </div>
+
+            <nav class="primary-navigation" aria-label="Primary navigation">
+                <div class="primary-navigation-scroll">
+                    <asp:Menu ID="MenuHome" runat="server"
+                        CssClass="main-menu"
+                        RenderingMode="List"
+                        Orientation="Horizontal"
+                        IncludeStyleBlock="false"
+                        OnMenuItemClick="MenuHome_MenuItemClick">
+                        <Items>
+                            <asp:MenuItem NavigateUrl="~/PublicDashboard.aspx" Text="Public Dashboard" Value="Public Dashboard" />
+
+                            <asp:MenuItem Text="Administration" Value="Administration">
+                                <asp:MenuItem NavigateUrl="~/AdminDashboard.aspx" Text="Admin Dashboard" Value="Admin Dashboard" />
+                                <asp:MenuItem Text="Vacancy Management" Value="Vacancies">
+                                    <asp:MenuItem NavigateUrl="~/Teaching Vacancy data .aspx" Text="Teaching Vacancies" Value="Teaching Vacancies" />
+                                    <asp:MenuItem NavigateUrl="~/Non-TeachingVacancyManagement.aspx" Text="Non-Teaching Vacancies" Value="Non-Teaching Vacancies" />
+                                </asp:MenuItem>
+                                <asp:MenuItem Text="Staff Attendance" Value="Staff Attendance">
+                                    <asp:MenuItem NavigateUrl="~/TeachingStaffAttendance.aspx" Text="Teaching Attendance" Value="Teaching Attendance" />
+                                    <asp:MenuItem NavigateUrl="~/Non_TeachingStaffAttendance.aspx" Text="Non-Teaching Attendance" Value="Non-Teaching Attendance" />
+                                </asp:MenuItem>
+                                <asp:MenuItem Text="Timetable" Value="Timetable">
+                                    <asp:MenuItem NavigateUrl="~/TeacherClassesTimeTable.aspx" Text="Manage Timetable" Value="Manage Timetable" />
+                                    <asp:MenuItem NavigateUrl="~/PrintTeacherWorkLoad.aspx" Text="Teacher Workload" Value="Teacher Workload" />
+                                    <asp:MenuItem NavigateUrl="~/BellTimingsManagement.aspx" Text="Bell Timings" Value="Bell Timings" />
+                                </asp:MenuItem>
+                                <asp:MenuItem Text="Examinations" Value="Examinations">
+                                    <asp:MenuItem NavigateUrl="~/UpcommingExamDetails.aspx" Text="Manage Examinations" Value="Manage Examinations" />
+                                    <asp:MenuItem NavigateUrl="~/ManageSubjectInExam.aspx" Text="Exam Subjects" Value="Exam Subjects" />
+                                    <asp:MenuItem NavigateUrl="~/StudentResultEntry.aspx" Text="Enter Student Results" Value="Enter Student Results" />
+                                    <asp:MenuItem NavigateUrl="~/StudentResultReports.aspx" Text="Print Result Cards" Value="Print Student Result Cards" />
+                                    <asp:MenuItem NavigateUrl="~/BoardResultManagement.aspx" Text="Board Subject Results" Value="Board Subject Results" />
+                                </asp:MenuItem>
+                            </asp:MenuItem>
+
+                            <asp:MenuItem Text="Staff" Value="Staff">
+                                <asp:MenuItem NavigateUrl="~/TeacherRegForm.aspx" Text="Register Teacher" Value="Register Teacher" />
+                                <asp:MenuItem NavigateUrl="~/ManageTeachersData.aspx" Text="Manage Teachers" Value="Manage Teachers" />
+                                <asp:MenuItem NavigateUrl="~/PrintAllTeacherList.aspx" Text="Teacher Directory" Value="Teacher Directory" />
+                                <asp:MenuItem NavigateUrl="~/Non_TeachingStaffForm.aspx" Text="Register Non-Teaching Staff" Value="Register Non-Teaching Staff" />
+                                <asp:MenuItem NavigateUrl="~/Manage_Non_Teaching_Records.aspx" Text="Manage Non-Teaching Staff" Value="Manage Non-Teaching Staff" />
+                                <asp:MenuItem NavigateUrl="~/StaffLifecycleManagement.aspx" Text="Staff Service Status" Value="Staff Service Status" />
+                                <asp:MenuItem NavigateUrl="~/TeacherCard.aspx" Text="Official Staff Cards" Value="Official Staff Cards" />
+                            </asp:MenuItem>
+
+                            <asp:MenuItem Text="Students" Value="Students">
+                                <asp:MenuItem NavigateUrl="~/StudentRegistrationForm.aspx" Text="Register Student" Value="Register Student" />
+                                <asp:MenuItem NavigateUrl="~/ManageStudentData.aspx" Text="Manage Student Records" Value="Manage Student Records" />
+                                <asp:MenuItem NavigateUrl="~/StudentPromotion.aspx" Text="Student Promotion" Value="Student Promotion" />
+                                <asp:MenuItem NavigateUrl="~/StudentPrintData.aspx" Text="Student Reports" Value="Student Reports" />
+                                <asp:MenuItem NavigateUrl="~/PrintStudentCard.aspx" Text="Student Cards" Value="Student Cards" />
+                                <asp:MenuItem NavigateUrl="~/SchoolLeavingCertificate.aspx" Text="School Leaving Certificate" Value="School Leaving Certificate" />
+                                <asp:MenuItem NavigateUrl="~/StudentCharacterCertificate.aspx" Text="Character Certificate" Value="Character Certificate" />
+                                <asp:MenuItem NavigateUrl="~/StudentProfile.aspx" Text="Student Profile and Diary" Value="Student Profile and Diary" />
+                                <asp:MenuItem Text="Student Attendance" Value="Student Attendance">
+                                    <asp:MenuItem NavigateUrl="~/StudentAttendance.aspx" Text="Mark Attendance" Value="Mark Student Attendance" />
+                                    <asp:MenuItem NavigateUrl="~/StudentAttendanceReport.aspx" Text="Attendance Sheets" Value="Student Attendance Sheets" />
+                                    <asp:MenuItem NavigateUrl="~/StudentAttendanceAnalytics.aspx" Text="Progress Analysis" Value="Student Attendance Analysis" />
+                                </asp:MenuItem>
+                            </asp:MenuItem>
+
+                            <asp:MenuItem Text="Academics" Value="Academics">
+                                <asp:MenuItem NavigateUrl="~/ClassManagement.aspx" Text="Classes" Value="Classes" />
+                                <asp:MenuItem NavigateUrl="~/ClassMentorManagement.aspx" Text="Class Incharges" Value="Class Incharges" />
+                                <asp:MenuItem NavigateUrl="~/Subjects.aspx" Text="Subjects" Value="Subjects" />
+                                <asp:MenuItem NavigateUrl="~/ClassSubjectsManagement.aspx" Text="Class Subjects" Value="Class Subjects" />
+                            </asp:MenuItem>
+
+                            <asp:MenuItem Text="Fee Management" Value="Fee Management">
+                                <asp:MenuItem NavigateUrl="~/SchoolFeeManagement.aspx" Text="Add Fee Rates" Value="Add Fee Rates" />
+                                <asp:MenuItem NavigateUrl="~/FeeCollection.aspx" Text="Collect Fee" Value="Collect Fee" />
+                            </asp:MenuItem>
+
+                            <asp:MenuItem Text="Funds &amp; Accounts" Value="Funds and Accounts">
+                                <asp:MenuItem NavigateUrl="~/NSBFundManagement.aspx" Text="NSB Management" Value="NSB Management" />
+                                <asp:MenuItem NavigateUrl="~/FTFFundManagement.aspx" Text="FTF Management" Value="FTF Management" />
+                                <asp:MenuItem NavigateUrl="~/SMCFundManagement.aspx" Text="SMC Account" Value="SMC Account" />
+                                <asp:MenuItem Text="Annual Budget" Value="Annual Budget">
+                                    <asp:MenuItem NavigateUrl="~/BudgetSetup.aspx" Text="Budget Master Setup" Value="Budget Master Setup" />
+                                    <asp:MenuItem NavigateUrl="~/AnnualBudget.aspx" Text="Develop Annual Budget" Value="Develop Annual Budget" />
+                                    <asp:MenuItem NavigateUrl="~/BudgetReports.aspx" Text="Budget Forms and PDF" Value="Budget Forms and PDF" />
+                                </asp:MenuItem>
+                                <asp:MenuItem Text="Monthly Expenditure" Value="Monthly Expenditure">
+                                    <asp:MenuItem NavigateUrl="~/MonthlyExpenditure.aspx" Text="Prepare Statement" Value="Prepare Monthly Expenditure Statement" />
+                                    <asp:MenuItem NavigateUrl="~/MonthlyExpenditureReports.aspx" Text="Statements and PDF" Value="Monthly Expenditure Statements and PDF" />
+                                </asp:MenuItem>
+                            </asp:MenuItem>
+
+                            <asp:MenuItem Text="Office Daak" Value="Office Daak">
+                                <asp:MenuItem NavigateUrl="~/DaakDispatch.aspx" Text="Daak Dispatch" Value="Daak Dispatch" />
+                                <asp:MenuItem NavigateUrl="~/DaakDiary.aspx" Text="Daak Diary" Value="Daak Diary" />
+                            </asp:MenuItem>
+
+                            <asp:MenuItem Text="Governance &amp; Records" Value="Governance and Records">
+                                <asp:MenuItem NavigateUrl="~/SchoolCouncilManagement.aspx" Text="School Council" Value="School Council" />
+                                <asp:MenuItem NavigateUrl="~/SchoolAssets.aspx" Text="School Assets" Value="School Assets" />
+                                <asp:MenuItem NavigateUrl="~/LaboratoryRecords.aspx" Text="Laboratory Records" Value="Laboratory Records" />
+                                <asp:MenuItem NavigateUrl="~/OldSchoolRecords.aspx" Text="Old School Records" Value="Old School Records" />
+                                <asp:MenuItem NavigateUrl="~/PublicContentManagement.aspx" Text="Public Announcements" Value="Public Announcements" />
+                                <asp:MenuItem NavigateUrl="~/StudentUnionElection.aspx" Text="Manage Student Union Election" Value="Manage Student Union Election" />
+                                <asp:MenuItem NavigateUrl="~/StudentUnionVoting.aspx" Text="Public Student Ballot" Value="Public Student Ballot" />
+                            </asp:MenuItem>
+
+                            <asp:MenuItem Text="System" Value="System">
+                                <asp:MenuItem NavigateUrl="~/Login.aspx?manage=1" Text="Login / Admin Account" Value="Login and Admin Account" />
+                                <asp:MenuItem NavigateUrl="~/DataBackup.aspx" Text="Data Backup" Value="Data Backup" />
+                            </asp:MenuItem>
+                        </Items>
+                    </asp:Menu>
+                    <asp:Menu ID="MenuTeacher" runat="server" CssClass="main-menu" RenderingMode="List"
+                        Orientation="Horizontal" IncludeStyleBlock="false" Visible="false">
+                        <Items>
+                            <asp:MenuItem NavigateUrl="~/TeacherDashboard.aspx" Text="My Dashboard" Value="Teacher Dashboard" />
+                            <asp:MenuItem NavigateUrl="~/StudentAttendance.aspx" Text="Class Attendance" Value="Class Attendance" />
+                            <asp:MenuItem NavigateUrl="~/StudentResultEntry.aspx" Text="Class Results" Value="Class Results" />
+                            <asp:MenuItem NavigateUrl="~/FeeCollection.aspx" Text="Fee Collection" Value="Fee Collection" />
+                            <asp:MenuItem NavigateUrl="~/TeacherDiary.aspx" Text="Teachers Diary" Value="Teachers Diary" />
+                            <asp:MenuItem NavigateUrl="~/StudentProfile.aspx" Text="Student Profiles" Value="Student Profiles" />
+                            <asp:MenuItem NavigateUrl="~/StudentUnionVoting.aspx" Text="Student Election" Value="Student Election" />
+                        </Items>
+                    </asp:Menu>
+                </div>
+            </nav>
+        </header>
+
+        <main id="main-content" class="site-content-shell" tabindex="-1">
+            <asp:ContentPlaceHolder ID="MainContent" runat="server" />
+        </main>
+
+        <footer class="site-footer">
+            <strong>Government Higher Secondary School Maankot, Kabirwala</strong>
+            <span>Digital School Manager | Developed by Mithoo Khan (SSE Computer Science)</span>
+        </footer>
+    </form>
+</body>
+</html>
